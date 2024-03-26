@@ -22,7 +22,12 @@ def pregunta_01():
     40
 
     """
-    return
+    cantidad_filas = len(tbl0)
+
+    
+    return cantidad_filas
+
+    
 
 
 def pregunta_02():
@@ -33,7 +38,10 @@ def pregunta_02():
     4
 
     """
-    return
+    cantidad_columnas = tbl0.shape[1]
+
+    return cantidad_columnas
+
 
 
 def pregunta_03():
@@ -50,7 +58,11 @@ def pregunta_03():
     Name: _c1, dtype: int64
 
     """
-    return
+    conteo_letras = tbl0['_c1'].value_counts().sort_index()
+
+    
+    return conteo_letras
+
 
 
 def pregunta_04():
@@ -65,7 +77,15 @@ def pregunta_04():
     E    4.785714
     Name: _c2, dtype: float64
     """
-    return
+        # Calcular el promedio de _c2 por cada letra en la columna _c1
+    promedio_letras = tbl0.groupby('_c1')['_c2'].mean().sort_index()
+    
+    # Asignar nombre y tipo de datos a la serie resultante
+    promedio_letras.name = 'Promedio_c2'
+    promedio_letras = promedio_letras.astype(float)
+    
+    return promedio_letras
+
 
 
 def pregunta_05():
@@ -82,7 +102,19 @@ def pregunta_05():
     E    9
     Name: _c2, dtype: int64
     """
-    return
+    
+    maximo_letras = tbl0.groupby('_c1')['_c2'].max().sort_index()
+    
+    # Crear un objeto pd.Series con el formato específico requerido
+    maximo_letras_series = pd.Series({"A": maximo_letras['A'], 
+                                       "B": maximo_letras['B'], 
+                                       "C": maximo_letras['C'], 
+                                       "D": maximo_letras['D'], 
+                                       "E": maximo_letras['E']})
+    
+    return maximo_letras_series
+
+#print(pregunta_05())
 
 
 def pregunta_06():
@@ -94,7 +126,14 @@ def pregunta_06():
     ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 
     """
-    return
+    # Extraer los valores únicos de la columna _c4, convertirlos a mayúsculas y ordenarlos alfabéticamente
+    unique_values = sorted(tbl1['_c4'].astype(str).str.upper().unique())
+
+
+    return unique_values
+ 
+
+
 
 
 def pregunta_07():
@@ -110,7 +149,11 @@ def pregunta_07():
     E    67
     Name: _c2, dtype: int64
     """
-    return
+    
+    # Calcular la suma de la _c2 por cada letra de la _c1
+    sum_by_letter = tbl0.groupby('_c1')['_c2'].sum()
+
+    return sum_by_letter
 
 
 def pregunta_08():
@@ -128,7 +171,10 @@ def pregunta_08():
     39   39   E    5  1998-01-26    44
 
     """
-    return
+    tbl0['suma'] = tbl0['_c0'] + tbl0['_c2']
+
+    return tbl0
+
 
 
 def pregunta_09():
@@ -146,7 +192,10 @@ def pregunta_09():
     39   39   E    5  1998-01-26  1998
 
     """
-    return
+
+    tbl0["year"] = tbl0["_c3"].str.split("-").str[0]
+
+    return tbl0
 
 
 def pregunta_10():
@@ -163,8 +212,12 @@ def pregunta_10():
     3   D                  1:2:3:5:5:7
     4   E  1:1:2:3:3:4:5:5:5:6:7:8:8:9
     """
-    return
 
+    tabla = tbl0.groupby("_c1")["_c2"].apply(lambda x: ":".join(sorted(x.astype(str))))
+    tabla.columns = ["_c0", "_c1"]
+    tabla = pd.DataFrame(tabla)
+    return tabla
+print(pregunta_10())
 
 def pregunta_11():
     """
@@ -182,7 +235,15 @@ def pregunta_11():
     38   38      d,e
     39   39    a,d,f
     """
-    return
+    tabla = (
+        tbl1.groupby("_c0")["_c4"]
+        .apply(lambda x: ",".join(sorted(x.astype(str))))
+        .reset_index()
+    )
+    tabla = pd.DataFrame(tabla)
+    return tabla
+
+
 
 
 def pregunta_12():
@@ -200,7 +261,15 @@ def pregunta_12():
     38   38                    eee:0,fff:9,iii:2
     39   39                    ggg:3,hhh:8,jjj:5
     """
-    return
+    tbl2['_c5'] = tbl2.apply(lambda x: f"{x['_c5a']}:{x['_c5b']}", axis=1)
+    tbl2_grouped = tbl2.groupby('_c0')['_c5'].apply(lambda x: ','.join(sorted(x))).reset_index()
+    tbl2_grouped = tbl2_grouped.rename(columns={'_c5': '_c4'})
+    tbl2_grouped['_c0'] = tbl2_grouped['_c0'].astype(int)
+    tbl2_grouped = tbl2_grouped.sort_values(by='_c0').reset_index(drop=True)
+    tbl2_grouped.columns = ["_c0", "_c5"]
+    return tbl2_grouped
+
+
 
 
 def pregunta_13():
@@ -217,4 +286,12 @@ def pregunta_13():
     E    275
     Name: _c5b, dtype: int64
     """
-    return
+        # Unir las tablas utilizando _c0 como clave
+    merged_table = pd.merge(tbl0, tbl2, left_on='_c0', right_on='_c0')
+
+    # Calcular la suma de _c5b por cada valor en _c1
+    sum_by_c1 = merged_table.groupby('_c1')['_c5b'].sum()
+
+    return sum_by_c1
+
+#print(pregunta_13())
